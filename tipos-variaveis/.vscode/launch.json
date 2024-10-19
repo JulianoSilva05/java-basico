@@ -1,0 +1,195 @@
+{
+    // Use o IntelliSense para saber mais sobre os atributos possíveis.
+    // Focalizar para exibir as descrições dos atributos existentes.
+    // Para obter mais informações, acesse: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Java",
+            "type": "java",
+            "request": "launch",
+            "stopOnEntry": true,
+            "jdkPath": "${env:JAVA_HOME}/bin",
+            "cwd": "${fileDirname}",
+            "startupClass": "${fileBasenameNoExtension}",
+            "classpath": [
+                ".",
+                "${fileDirname}"
+            ]
+        },
+        {
+            "name": "Java Console App",
+            "type": "java",
+            "request": "launch",
+            "stopOnEntry": true,
+            "jdkPath": "${env:JAVA_HOME}/bin",
+            "cwd": "${fileDirname}",
+            "startupClass": "${fileBasenameNoExtension}",
+            "classpath": [
+                ".",
+                "${fileDirname}"
+            ],
+            "externalConsole": true
+        },
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "ClassePrincipal",
+            "request": "launch",
+            "mainClass": "edu.classe.ClassePrincipal",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "Atividade",
+            "request": "launch",
+            "mainClass": "edu.proz.btt.Atividade",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "AtividadeDois",
+            "request": "launch",
+            "mainClass": "edu.proz.btt.AtividadeDois",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "ContarVogais",
+            "request": "launch",
+            "mainClass": "edu.proz.btt.ContarVogais",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "Dividir",
+            "request": "launch",
+            "mainClass": "edu.proz.btt.Dividir",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "ExtrairParte",
+            "request": "launch",
+            "mainClass": "edu.proz.btt.ExtrairParte",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "hello",
+            "request": "launch",
+            "mainClass": "edu.proz.btt.hello",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "TiposDeVariaveis",
+            "request": "launch",
+            "mainClass": "edu.proz.ctt.TiposDeVariaveis",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "TiposVariaveis",
+            "request": "launch",
+            "mainClass": "edu.proz.ctt.TiposVariaveis",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "Welcome1",
+            "request": "launch",
+            "mainClass": "edu.proz.ctt.Welcome1",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "Tema3Atv1",
+            "request": "launch",
+            "mainClass": "edu.respostas.tema3.Tema3Atv1",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "Tema3Atv2",
+            "request": "launch",
+            "mainClass": "edu.respostas.tema3.Tema3Atv2",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "Tema3Atv3",
+            "request": "launch",
+            "mainClass": "edu.respostas.tema3.Tema3Atv3",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "Tema3Atv4",
+            "request": "launch",
+            "mainClass": "edu.respostas.tema3.Tema3Atv4",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "Tema3Atv5",
+            "request": "launch",
+            "mainClass": "edu.respostas.tema3.Tema3Atv5",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "Tema3Atv6",
+            "request": "launch",
+            "mainClass": "edu.respostas.tema3.Tema3Atv6",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "Tema3Atv7",
+            "request": "launch",
+            "mainClass": "edu.respostas.tema3.Tema3Atv7",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "Atv1",
+            "request": "launch",
+            "mainClass": "edu.respostas.tema5.Atv1",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "Atv2",
+            "request": "launch",
+            "mainClass": "edu.respostas.tema5.Atv2",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "Atv3",
+            "request": "launch",
+            "mainClass": "edu.respostas.tema5.Atv3",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "Atv4",
+            "request": "launch",
+            "mainClass": "edu.respostas.tema5.Atv4",
+            "projectName": "tipos-variaveis_3cb78286"
+        },
+        {
+            "type": "java",
+            "name": "Teste",
+            "request": "launch",
+            "mainClass": "edu.respostas.tema5.Teste",
+            "projectName": "tipos-variaveis_3cb78286"
+        }
+    ]
+}
