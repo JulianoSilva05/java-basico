@@ -1,108 +1,75 @@
-# Guia completo: Agenda de Contatos em Java Swing + MySQL (NetBeans)
+# Guia completo (funcional): Agenda de Contatos em Java Swing + MySQL no NetBeans (USANDO ROOT)
 
-Este roteiro foi pensado para aula, do **zero até a instalação em rede** de uma aplicação desktop Java Swing que salva contatos com **nome** e **telefone** em banco **MySQL**.
+Este material foi ajustado para evitar os problemas mais comuns:
 
----
+- “não está inserindo dados”
+- “não está exibindo os dados já salvos”
+- MySQL 8: Public Key Retrieval
+- Permissão: Access denied
 
-## 1) Objetivo do projeto
+## 1) Pré-requisitos
 
-Criar uma aplicação desktop com:
+- JDK 17 (ou 11+)
+- NetBeans
+- MySQL Server 8+
+- (Opcional) MySQL Workbench
 
-- Campo **Nome**
-- Campo **Telefone**
-- Botão **Salvar**
-- Lista/Tabela de contatos gravados
-- Persistência em banco MySQL
+## 2) Banco de dados
 
-Arquitetura sugerida para os alunos:
-
-- `model` → classe `Contato`
-- `dao` → classe `ContatoDAO` (acesso ao banco)
-- `view` → formulário Swing (`JFrame`)
-- `util` → classe de conexão (`ConexaoMySQL`)
-
----
-
-## 2) Pré-requisitos
-
-Instalar na máquina do professor e dos alunos:
-
-1. **JDK 17** (ou 11+)
-2. **NetBeans IDE** (com suporte a Java)
-3. **MySQL Server 8.x**
-4. **MySQL Workbench** (opcional, mas facilita)
-
-> Dica para aula: padronize a turma com a mesma versão de JDK e NetBeans para evitar erros de compatibilidade.
-
----
-
-## 3) Criar o banco de dados
-
-No MySQL (Workbench ou terminal), execute:
+Execute no MySQL (Workbench ou terminal):
 
 ```sql
-CREATE DATABASE agenda_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS agenda_db
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
 
 USE agenda_db;
 
-CREATE TABLE contatos (
+CREATE TABLE IF NOT EXISTS contatos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(120) NOT NULL,
     telefone VARCHAR(20) NOT NULL
 );
 ```
 
-Crie um usuário específico da aplicação (recomendado):
+Teste rápido:
 
 ```sql
-CREATE USER 'agenda_user'@'%' IDENTIFIED BY 'SenhaForte123!';
-GRANT ALL PRIVILEGES ON agenda_db.* TO 'agenda_user'@'%';
-FLUSH PRIVILEGES;
+INSERT INTO contatos (nome, telefone) VALUES ('Teste SQL', '(11) 90000-0000');
+SELECT * FROM contatos;
 ```
 
----
+## 3) Criar o projeto no NetBeans
 
-## 4) Criar o projeto no NetBeans
+1. File > New Project > Java Application
+2. Nome: `AgendaContatos`
+3. Criar pacotes:
+   - `br.com.agenda.model`
+   - `br.com.agenda.util`
+   - `br.com.agenda.dao`
+   - `br.com.agenda.view`
 
-1. Abra o NetBeans
-2. **File > New Project**
-3. Categoria: **Java with Ant** (ou Maven) > **Java Application**
-4. Nome: `AgendaContatos`
-5. Desmarque *Create Main Class* (opcional)
-6. Finalize
+## 4) Driver JDBC (obrigatório)
 
-Crie os pacotes:
+### Maven (recomendado)
 
-- `br.com.agenda.model`
-- `br.com.agenda.dao`
-- `br.com.agenda.util`
-- `br.com.agenda.view`
-
----
-
-## 5) Adicionar driver JDBC do MySQL
-
-### Opção A (Maven – recomendado)
-No `pom.xml`, adicione:
+No `pom.xml`:
 
 ```xml
 <dependency>
-    <groupId>com.mysql</groupId>
-    <artifactId>mysql-connector-j</artifactId>
-    <version>8.4.0</version>
+  <groupId>com.mysql</groupId>
+  <artifactId>mysql-connector-j</artifactId>
+  <version>8.4.0</version>
 </dependency>
 ```
 
-### Opção B (Projeto Ant)
-1. Baixe o conector em: <https://dev.mysql.com/downloads/connector/j/>
-2. No projeto NetBeans: **Libraries > Add JAR/Folder**
-3. Selecione o `.jar` do connector
+### Ant
 
----
+Adicione o JAR em `Libraries > Add JAR/Folder`.
 
-## 6) Classe de conexão (`ConexaoMySQL`)
+## 5) Classe de conexão (MySQL 8 + ROOT)
 
-Crie `br.com.agenda.util.ConexaoMySQL`:
+`br.com.agenda.util.ConexaoMySQL`
 
 ```java
 package br.com.agenda.util;
@@ -113,9 +80,16 @@ import java.sql.SQLException;
 
 public class ConexaoMySQL {
 
-    private static final String URL = "jdbc:mysql://localhost:3306/agenda_db?useSSL=false&serverTimezone=UTC";
-    private static final String USER = "agenda_user";
-    private static final String PASS = "SenhaForte123!";
+    // Em rede, troque localhost pelo IP do servidor MySQL
+    private static final String URL =
+        "jdbc:mysql://localhost:3306/agenda_db"
+      + "?useSSL=false"
+      + "&allowPublicKeyRetrieval=true"
+      + "&serverTimezone=America/Sao_Paulo"
+      + "&characterEncoding=UTF-8";
+
+    private static final String USER = "root";
+    private static final String PASS = "986050";
 
     public static Connection conectar() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASS);
@@ -123,13 +97,11 @@ public class ConexaoMySQL {
 }
 ```
 
-> Em rede, troque `localhost` pelo IP/nome do servidor MySQL.
+✅ Esse `allowPublicKeyRetrieval=true` evita o erro: `Public Key Retrieval is not allowed`
 
----
+## 6) Model
 
-## 7) Classe de modelo (`Contato`)
-
-Crie `br.com.agenda.model.Contato`:
+`br.com.agenda.model.Contato`
 
 ```java
 package br.com.agenda.model;
@@ -157,11 +129,9 @@ public class Contato {
 }
 ```
 
----
+## 7) DAO (com erros claros)
 
-## 8) Classe DAO (`ContatoDAO`)
-
-Crie `br.com.agenda.dao.ContatoDAO`:
+`br.com.agenda.dao.ContatoDAO`
 
 ```java
 package br.com.agenda.dao;
@@ -175,7 +145,7 @@ import java.util.List;
 
 public class ContatoDAO {
 
-    public void salvar(Contato contato) {
+    public void salvar(Contato contato) throws SQLException {
         String sql = "INSERT INTO contatos (nome, telefone) VALUES (?, ?)";
 
         try (Connection conn = ConexaoMySQL.conectar();
@@ -184,15 +154,12 @@ public class ContatoDAO {
             ps.setString(1, contato.getNome());
             ps.setString(2, contato.getTelefone());
             ps.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao salvar contato", e);
         }
     }
 
-    public List<Contato> listarTodos() {
-        String sql = "SELECT id, nome, telefone FROM contatos ORDER BY nome";
-        List<Contato> contatos = new ArrayList<>();
+    public List<Contato> listarTodos() throws SQLException {
+        String sql = "SELECT id, nome, telefone FROM contatos ORDER BY id DESC";
+        List<Contato> lista = new ArrayList<>();
 
         try (Connection conn = ConexaoMySQL.conectar();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -203,32 +170,28 @@ public class ContatoDAO {
                 c.setId(rs.getInt("id"));
                 c.setNome(rs.getString("nome"));
                 c.setTelefone(rs.getString("telefone"));
-                contatos.add(c);
+                lista.add(c);
             }
-
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao listar contatos", e);
         }
 
-        return contatos;
+        return lista;
     }
 }
 ```
 
----
+## 8) Tela Swing (JFrame Form) — versão que atualiza tabela corretamente
 
-## 9) Criar interface gráfica (JFrame Form no NetBeans)
+Crie um `JFrame Form` chamado `AgendaView` com:
 
-No pacote `view`, crie `AgendaView` (JFrame Form) com componentes:
+- `txtNome` (JTextField)
+- `txtTelefone` (JTextField)
+- `btnSalvar` (JButton)
+- `btnAtualizar` (JButton) (opcional, mas útil)
+- `tblContatos` (JTable)
 
-- `JLabel` Nome
-- `JTextField` (`txtNome`)
-- `JLabel` Telefone
-- `JTextField` (`txtTelefone`)
-- `JButton` (`btnSalvar`)
-- `JTable` (`tblContatos`) com colunas: ID, Nome, Telefone
+Lógica do `AgendaView` (cole na classe)
 
-Exemplo de código principal do formulário:
+Importante: não deixe a JTable com linhas `{null,null,null}` no modelo.
 
 ```java
 package br.com.agenda.view;
@@ -236,50 +199,50 @@ package br.com.agenda.view;
 import br.com.agenda.dao.ContatoDAO;
 import br.com.agenda.model.Contato;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
+import java.sql.SQLException;
 import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
-public class AgendaView extends JFrame {
-
-    private JTextField txtNome;
-    private JTextField txtTelefone;
-    private JButton btnSalvar;
-    private JTable tblContatos;
+public class AgendaView extends javax.swing.JFrame {
 
     private final ContatoDAO contatoDAO = new ContatoDAO();
 
     public AgendaView() {
         initComponents();
+        configurarTabela();
         carregarTabela();
     }
 
-    private void initComponents() {
-        setTitle("Agenda de Contatos");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    private void configurarTabela() {
+        DefaultTableModel modelo = new DefaultTableModel(
+            new Object[][]{},
+            new String[]{"ID", "Nome", "Telefone"}
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        tblContatos.setModel(modelo);
+    }
 
-        txtNome = new JTextField(20);
-        txtTelefone = new JTextField(15);
-        btnSalvar = new JButton("Salvar");
-        tblContatos = new JTable(new DefaultTableModel(
-                new Object[][]{},
-                new String[]{"ID", "Nome", "Telefone"}
-        ));
+    private void carregarTabela() {
+        DefaultTableModel modelo = (DefaultTableModel) tblContatos.getModel();
+        modelo.setRowCount(0);
 
-        btnSalvar.addActionListener(e -> salvarContato());
-
-        JPanel painel = new JPanel();
-        painel.add(new JLabel("Nome:"));
-        painel.add(txtNome);
-        painel.add(new JLabel("Telefone:"));
-        painel.add(txtTelefone);
-        painel.add(btnSalvar);
-
-        add(painel, "North");
-        add(new JScrollPane(tblContatos), "Center");
-
-        pack();
-        setLocationRelativeTo(null);
+        try {
+            List<Contato> contatos = contatoDAO.listarTodos();
+            for (Contato c : contatos) {
+                modelo.addRow(new Object[]{c.getId(), c.getNome(), c.getTelefone()});
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                "Erro ao listar contatos: " + e.getMessage(),
+                "Erro",
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void salvarContato() {
@@ -291,37 +254,41 @@ public class AgendaView extends JFrame {
             return;
         }
 
-        contatoDAO.salvar(new Contato(nome, telefone));
-        txtNome.setText("");
-        txtTelefone.setText("");
-        carregarTabela();
-
-        JOptionPane.showMessageDialog(this, "Contato salvo com sucesso!");
+        try {
+            contatoDAO.salvar(new Contato(nome, telefone));
+            txtNome.setText("");
+            txtTelefone.setText("");
+            carregarTabela();
+            JOptionPane.showMessageDialog(this, "Contato salvo com sucesso!");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                "Erro ao salvar contato: " + e.getMessage(),
+                "Erro",
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
-    private void carregarTabela() {
-        DefaultTableModel modelo = (DefaultTableModel) tblContatos.getModel();
-        modelo.setRowCount(0);
+    // Vincule no ActionPerformed do botão Salvar
+    private void btnSalvarActionPerformed(java.awt.event.ActionEvent evt) {
+        salvarContato();
+    }
 
-        List<Contato> contatos = contatoDAO.listarTodos();
-        for (Contato c : contatos) {
-            modelo.addRow(new Object[]{c.getId(), c.getNome(), c.getTelefone()});
-        }
+    // Vincule no ActionPerformed do botão Atualizar (se você criou)
+    private void btnAtualizarActionPerformed(java.awt.event.ActionEvent evt) {
+        carregarTabela();
     }
 }
 ```
 
----
+## 9) Main
 
-## 10) Classe principal para iniciar a aplicação
-
-Crie `br.com.agenda.Main`:
+`br.com.agenda.Main`
 
 ```java
 package br.com.agenda;
 
 import br.com.agenda.view.AgendaView;
-
 import javax.swing.SwingUtilities;
 
 public class Main {
@@ -331,124 +298,42 @@ public class Main {
 }
 ```
 
----
+## 10) Checklist (quando “não salva” ou “não lista”)
 
-## 11) Testes em sala (roteiro de validação)
+Verifique nesta ordem:
 
-1. Abrir a aplicação
-2. Cadastrar 3 contatos
-3. Fechar e abrir novamente
-4. Confirmar que os dados persistiram
-5. Tentar salvar com campos vazios (deve bloquear)
+1. O driver JDBC está mesmo no projeto? (Maven baixou / Ant com JAR em Libraries)
+2. `ConexaoMySQL` aponta para o banco certo? (`agenda_db` na URL)
+3. URL contém `allowPublicKeyRetrieval=true` (MySQL 8)
+4. O botão Salvar está ligado ao evento `btnSalvarActionPerformed`?
+5. `configurarTabela()` e `carregarTabela()` são chamados no construtor após `initComponents()`?
+6. No Workbench, `SELECT * FROM contatos;` retorna registros?
 
-Consultas SQL úteis para demonstrar resultado:
+## 11) Build executável (JAR)
 
-```sql
-SELECT * FROM contatos;
-```
+No NetBeans:
 
----
+1. Botão direito no projeto
+2. Clean and Build
+3. JAR em `dist/AgendaContatos.jar`
 
-## 12) Build executável (JAR)
-
-### No NetBeans
-1. Clique com botão direito no projeto
-2. **Clean and Build**
-3. O JAR será gerado em `dist/AgendaContatos.jar`
-
-### Executar via terminal
+Executar:
 
 ```bash
 java -jar AgendaContatos.jar
 ```
 
-> Se usar Ant, confirme que as bibliotecas estão em `dist/lib` junto do JAR.
+## 12) Rede (laboratório) — usando root (funciona, mas atenção)
 
----
+No cliente, mude apenas a URL:
 
-## 13) Publicação e instalação em rede (laboratório/escola)
+```java
+"jdbc:mysql://192.168.1.50:3306/agenda_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Sao_Paulo&characterEncoding=UTF-8"
+```
 
-### Cenário recomendado
-- 1 servidor com MySQL
-- Várias máquinas cliente rodando o app Swing
+E mantenha:
 
-### Passos
-
-1. **Servidor MySQL**
-   - Defina IP fixo (ex.: `192.168.1.50`)
-   - Libere porta `3306` no firewall
-   - Configure `bind-address` para aceitar rede local (se necessário)
-
-2. **Banco e usuário**
-   - Já criar usuário com host `%` ou por sub-rede
-   - Exemplo mais restrito:
-     ```sql
-     CREATE USER 'agenda_user'@'192.168.1.%' IDENTIFIED BY 'SenhaForte123!';
-     GRANT ALL PRIVILEGES ON agenda_db.* TO 'agenda_user'@'192.168.1.%';
-     FLUSH PRIVILEGES;
-     ```
-
-3. **Aplicação cliente**
-   - Em `ConexaoMySQL`, trocar URL para:
-     ```java
-     jdbc:mysql://192.168.1.50:3306/agenda_db?useSSL=false&serverTimezone=UTC
-     ```
-
-4. **Distribuição**
-   - Copiar para cada máquina:
-     - `AgendaContatos.jar`
-     - pasta `lib/` (quando houver dependências externas)
-
-5. **Requisito mínimo em cada cliente**
-   - Java JRE/JDK instalado
-
-6. **Atalho de execução**
-   - Windows: arquivo `.bat`
-     ```bat
-     @echo off
-     java -jar AgendaContatos.jar
-     ```
-
-7. **Teste final de rede**
-   - Abrir em duas máquinas
-   - Salvar contatos em ambas
-   - Conferir no banco central se registros entraram
-
----
-
-## 14) Boas práticas para evolução da aula
-
-- Validação de telefone com máscara ou regex
-- Botões de editar/excluir contato
-- Pesquisa por nome
-- Separar credenciais em arquivo `.properties`
-- Criar backup diário do banco (`mysqldump`)
-- Mostrar diferença entre `Statement` e `PreparedStatement` (segurança contra SQL Injection)
-
----
-
-## 15) Problemas comuns (e como resolver)
-
-1. **`No suitable driver found`**
-   - JDBC do MySQL não foi adicionado corretamente
-
-2. **`Access denied for user`**
-   - Usuário/senha incorretos ou sem permissão
-
-3. **`Communications link failure`**
-   - IP/porta do servidor incorretos
-   - Firewall bloqueando 3306
-   - MySQL não está aceitando conexões remotas
-
-4. **Acentuação quebrada**
-   - Banco/tabela sem `utf8mb4`
-
----
-
-## 16) Sugestão de sequência didática (2 a 3 aulas)
-
-- **Aula 1:** Banco, model, conexão, inserir contato
-- **Aula 2:** Tela Swing + tabela + listar contatos
-- **Aula 3:** Build, distribuição em rede e testes entre máquinas
-
-Com esse plano, os alunos saem de interface gráfica isolada para um sistema real com persistência e implantação básica em ambiente de rede.
+```java
+USER = "root";
+PASS = "986050";
+```
